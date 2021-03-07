@@ -1,0 +1,46 @@
+---
+# tasks file for slave
+- name: "download jdk software to namenode"
+  get_url: 
+        url:  "http://35.244.242.82/yum/java/el7/x86_64/jdk-8u171-linux-x64.rpm"
+        dest: /root
+
+- name: "download hadoop software to namenode"
+  get_url: 
+        url:  "https://archive.apache.org/dist/hadoop/common/hadoop-1.2.1/hadoop-1.2.1-1.x86_64.rpm"
+        dest: /root
+
+
+- name: "Installing jdk software on datanode"
+  yum:
+        name: "{{ jdk_location }}"
+        state: present
+        disable_gpg_check: yes
+  become: true
+  register: java
+
+- name: "Installing hadoop software on datanode"
+  shell: "rpm -i /root/hadoop-1.2.1-1.x86_64.rpm --force"
+  
+
+- name: "creating datanode file"
+  file:
+        state: directory
+        path: "{{ datanode_path }}"
+- name: "Configuring hdfs-site.xml file in datanode"
+  template:
+        dest: "/etc/hadoop/hdfs-site.xml"
+        src: "hdfs_slave.xml"
+
+- name: "Configuring core-site.xml file in datanode"
+  template:
+        dest: "/etc/hadoop/core-site.xml"
+        src: "hdfs_master_core.xml"
+
+
+
+- name: "stop hadoop datanode service"
+  shell: "hadoop-daemon.sh stop datanode"
+
+- name: "start hadoop datanode service"
+  shell: "hadoop-daemon.sh start datanode"

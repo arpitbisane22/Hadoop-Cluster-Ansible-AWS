@@ -1,0 +1,6 @@
+---
+# vars file for master
+
+jdk_location: "/root/jdk-8u171-linux-x64.rpm"
+namenode_path: "/nn"
+

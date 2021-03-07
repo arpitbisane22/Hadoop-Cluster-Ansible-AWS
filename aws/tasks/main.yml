@@ -1,0 +1,69 @@
+- name: "Hadoop Master"
+  ec2:
+       key_name: "arpit_aws"
+       instance_type: "t2.micro"
+       image: "ami-08e0ca9924195beba"
+       wait: yes
+       count: 1
+       instance_tags:
+         Name: "Master"
+       vpc_subnet_id : "subnet-fc3f3694"
+       assign_public_ip: yes
+       state: present
+       region: "ap-south-1"
+       group_id: "sg-02f5ee0fc6b3ea0b6"
+       aws_access_key: "{{ access_key }}"
+       aws_secret_key: "{{ secret_key }}"
+  register: master
+
+- debug: 
+       msg: "Successfully launched Master"  
+
+- name: "Adding Master in a host group"
+  add_host:
+       hostname: "{{ item.public_ip }}"
+       groups: masters
+  loop: "{{ master['instances'] }}"
+
+- name: "Waiting for SSH"
+  wait_for:
+       host: "{{ item.public_dns_name }}"
+       port: 22
+       state: started
+  loop: "{{ master['instances'] }}"
+
+
+- name: "Hadoop Slaves"
+  ec2:
+       key_name: "arpit_aws"
+       instance_type: "t2.micro"
+       image: "ami-08e0ca9924195beba"
+       wait: yes
+       count: 2
+       instance_tags:
+              Name: "Slaves"
+       vpc_subnet_id : "subnet-fc3f3694"
+       assign_public_ip: yes
+       state: present
+       region: "ap-south-1"
+       group_id: "sg-02f5ee0fc6b3ea0b6"
+       aws_access_key: "{{ access_key }}"
+       aws_secret_key: "{{ secret_key }}"
+  register: slave
+
+- debug:
+       msg: "Successfully launched Hadoop-slaves"
+
+
+- name: "Adding Slaves in a host group"
+  add_host:
+       hostname: "{{ item.public_ip }}"
+       groups: slaves
+  loop: "{{ slave['instances'] }}"
+
+- name: "Waiting for SSH"
+  wait_for:
+       host: "{{ item.public_dns_name }}"
+       port: 22
+       state: started
+  loop: "{{ slave['instances'] }}"  

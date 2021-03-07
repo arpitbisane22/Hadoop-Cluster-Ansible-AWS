@@ -1,0 +1,5 @@
+---
+# vars file for slave
+jdk_location: "/root/jdk-8u171-linux-x64.rpm"
+datanode_path: "/dn"
+
